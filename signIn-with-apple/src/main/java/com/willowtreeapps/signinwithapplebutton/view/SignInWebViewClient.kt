@@ -1,5 +1,6 @@
 package com.willowtreeapps.signinwithapplebutton.view
 
+import android.graphics.Bitmap
 import android.os.Handler
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -10,7 +11,8 @@ import java.lang.Exception
 
 internal class SignInWebViewClient(
     private val attempt: SignInWithAppleService.AuthenticationAttempt,
-    private val javascriptToInject: String
+    private val javascriptToInject: String,
+    private val  progressCallback :ProgressCallback
 ) : WebViewClient() {
     var mainHandler= Handler()
     override fun shouldInterceptRequest(
@@ -30,4 +32,18 @@ internal class SignInWebViewClient(
         }
         return super.shouldInterceptRequest(view, request)
     }
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+        progressCallback.isLoading(false)
+    }
+
+    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        super.onPageStarted(view, url, favicon)
+        progressCallback.isLoading(true)
+    }
+}
+
+interface ProgressCallback{
+    fun isLoading(loading:Boolean)
 }

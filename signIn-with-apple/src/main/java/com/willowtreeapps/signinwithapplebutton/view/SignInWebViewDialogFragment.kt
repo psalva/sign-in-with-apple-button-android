@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebView
+import android.widget.ProgressBar
+import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.DialogFragment
 import com.willowtreeapps.signinwithapplebutton.FormInterceptorInterface
 import com.willowtreeapps.signinwithapplebutton.R
@@ -36,7 +38,7 @@ internal class SignInWebViewDialogFragment : DialogFragment() {
     private var callback: ((SignInWithAppleResult) -> Unit)? = null
 
     private val webViewIfCreated: WebView?
-        get() = view as? WebView
+        get() = (view?.findViewById(R.id.webview) as WebView)
 
     fun configure(callback: (SignInWithAppleResult) -> Unit) {
         this.callback = callback
@@ -55,18 +57,29 @@ internal class SignInWebViewDialogFragment : DialogFragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        val webView = WebView(context).apply {
+        val view = inflater.inflate(R.layout.sign_in_with_apple_button_dialog_fragment, null)
+        val webView = (view.findViewById(R.id.webview) as WebView).apply {
             settings.apply {
                 javaScriptEnabled = true
                 javaScriptCanOpenWindowsAutomatically = true
             }
         }
+        val progress = (view.findViewById(R.id.progress)) as ProgressBar
 
-        val formInterceptorInterface = FormInterceptorInterface(authenticationAttempt.state,::onCallback)
+        val formInterceptorInterface =
+            FormInterceptorInterface(authenticationAttempt.state, ::onCallback)
         webView.addJavascriptInterface(formInterceptorInterface, FormInterceptorInterface.NAME)
 
         webView.webViewClient = SignInWebViewClient(authenticationAttempt,
-            FormInterceptorInterface.JS_TO_INJECT)
+            FormInterceptorInterface.JS_TO_INJECT, object : ProgressCallback {
+                override fun isLoading(loading: Boolean) {
+                    if (loading) {
+                        progress.visibility = View.VISIBLE
+                    } else {
+                        progress.visibility = View.GONE
+                    }
+                }
+            })
 
         if (savedInstanceState != null) {
             savedInstanceState.getBundle(WEB_VIEW_KEY)?.run {
@@ -76,7 +89,7 @@ internal class SignInWebViewDialogFragment : DialogFragment() {
             webView.loadUrl(authenticationAttempt.authenticationUri)
         }
 
-        return webView
+        return view
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
