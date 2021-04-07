@@ -21,8 +21,8 @@ class SampleActivity : AppCompatActivity() {
 
         // Replace clientId and redirectUri with your own values.
         val configuration =  SignInWithAppleConfiguration.Builder()
-           .clientId("com.your.client.id.here")
-           .redirectUri("https://your-redirect-uri.com/callback")
+           .clientId("cz.poetizer.Services")
+           .redirectUri("https://poetizer.com/callback")
            .responseType(SignInWithAppleConfiguration.ResponseType.ALL)
            .scope(SignInWithAppleConfiguration.Scope.ALL)
            .build()

@@ -62,7 +62,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.khaledshamieh:signIn-with-apple:0.4'
+    implementation 'com.github.psalva:signIn-with-apple:0.5'
 }
 ```
 
