@@ -62,7 +62,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.psalva:signIn-with-apple:0.5'
+    implementation 'com.github.psalva:signIn-with-apple:$latest_version'
 }
 ```
 
@@ -87,102 +87,6 @@ At runtime, create an instance of `SignInWithAppleConfiguration`, supplying thes
 
 Configure the button with a `FragmentManager` to present the login interface, the service you created above, and a callback to receive the success/failure/cancel result.
 
-#### Example
-
-Set up a `SignInWithAppleButton` via XML:
-
-```xml
-<com.willowtreeapps.signinwithapplebutton.view.SignInWithAppleButton
-    android:id="@+id/sign_in_with_apple_button"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    style="@style/SignInWithAppleButton.Black"
-    app:sign_in_with_apple_button_textType="signInWithApple"
-    app:sign_in_with_apple_button_cornerRadius="4dp" />
-```
-
-In your Activity, create the `SignInWithAppleService`, then configure the button:
-
-```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    ...
-
-    val configuration =  SignInWithAppleConfiguration.Builder()
-               .clientId("com.your.client.id.here")
-               .redirectUri("https://your-redirect-uri.com/callback")
-               .responseType(SignInWithAppleConfiguration.ResponseType.ALL)
-               .scope(SignInWithAppleConfiguration.Scope.ALL)
-               .build()
-
-    val callback: (SignInWithAppleResult) -> Unit = { result ->
-                when (result) {
-                    is SignInWithAppleResult.Success -> {
-                       // Handle success
-                       // result.authorizationCode
-                       // result.idToken
-                    }
-                    is SignInWithAppleResult.Failure -> {
-                      // Handle failure
-                      // result.error
-                    }
-                    is SignInWithAppleResult.Cancel -> {
-                      // Handle user cancel
-                    }
-                }
-            }
-
-    val signInWithAppleButton = findViewById(R.id.sign_in_with_apple_button)
-    signInWithAppleButton.setUpSignInWithAppleOnClick(supportFragmentManager, configuration, callback)
-
-}
-```
-
-> If configuring the button from Java, you can supply an implementation of `SignInWithAppleCallback` instead of a single callback function.
-
-### Behavior
-
-When the user taps the button, it will present a web view configured to let the user authorize your service as an OAuth client of their Apple ID. After the user authorizes access, Apple will forward to the redirect URI and include an authorization code. The web view will intercept this request and locate the authorization code.
-
-If the user completes authentication, your callback will receive a `SignInWithAppleResult.Success` with the authorization code and idToken. Your backend endpoint can then phone home to Apple to [exchange the authorization code for tokens](https://developer.apple.com/documentation/signinwithapplerestapi/generate_and_validate_tokens), completing login.
-
-If instead there is a failure, your callback will receive a `SignInWithAppleResult.Failure` with the error.
-
-If the user dismisses the authentication screen intentionally, you will receive a `SignInWithAppleResult.Cancel`.
-
-> If you supplied a `SignInWithAppleCallback` implementation rather than a single callback function, you will instead receive a call to the corresponding callback method.
-
-## Sample application
-
-We've included a sample Android app in the `sample` folder. This app is comparable to [Apple's sample project](https://developer.apple.com/documentation/authenticationservices/adding_the_sign_in_with_apple_flow_to_your_app) for the [iOS Sign In with Apple button](https://developer.apple.com/documentation/authenticationservices/asauthorizationappleidbutton).
-
-The sample app demonstrates:
-
-1. Adding the button and styling it, in `activity_sample.xml`
-2. Configuring the button with service details and a client, in `SampleActivity.onCreate()` or `SampleJavaActivity.onCreate()`
-3. Making use of the authorization code on success, in the callback
-
-You can adjust this sample project with your service configuration and try signing in.
-
-> `SampleActivity`, the Kotlin sample implementation, is launched by the sample app. To view `SampleJavaActivity`, you would need to update the activity name in the sample app's manifest XML.
-
-## Related projects
-
-- Front end components offering a Sign In with Apple button
-    - [Juice](https://developer.apple.com/documentation/authenticationservices/adding_the_sign_in_with_apple_flow_to_your_app), Apple's sample project, as seen in [WWDC 2019, Session 706 - Introducing Sign In with Apple](https://developer.apple.com/videos/play/wwdc19/706/)
-    - [@react-native-community/apple-authentication](https://github.com/react-native-community/apple-authentication), a React Native library
-    - [OmniAuth::Apple](https://github.com/nhosoya/omniauth-apple), an OmniAuth strategy for Rails web apps
-- Backend components for Sign In with Apple
-    - [apple-auth](https://github.com/ananay/apple-auth), an NPM package for JavaScript backends
-    - [apple_id](https://github.com/nov/apple_id), a gem for Ruby backends
-
-## Roadmap
-
-- Use a Chrome Custom Tab on Marshmallow and later so users know they are not being phished
-    - This will require consuming apps to configure App Links, but it's the Right Way to do it for OAuth security
-- Keep up with changes to Sign In with Apple during beta; 1.0 when the service itself is 1.0
-- Standard Android ripple effect? Material-themed Sign In with Apple button?
-
-## Contributing
 
 Contributions are welcome. Please see the [Contributing guidelines](CONTRIBUTING.md).
 
